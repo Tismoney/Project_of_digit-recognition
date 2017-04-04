@@ -1,7 +1,9 @@
-#!/usr/bin/python
+#!/home/paul/anaconda2/bin/python2.7
 
 import sys
 from PyQt4 import QtCore, QtGui
+import NerNet
+import numpy as np
 
 class ScribbleArea(QtGui.QWidget):
     def __init__(self, parent = None):
@@ -103,6 +105,18 @@ class ScribbleArea(QtGui.QWidget):
         painter.drawImage(QtCore.QPoint(0, 0), image)
         painter.end()
         self.image = newImage
+
+    def prepareImage(self):
+        newSize = QtCore.QSize(28, 28)
+        retImage = self.image.scaled(newSize)
+        buf = np.ndarray((28, 28))
+        for i in range(28):
+            for j in range(28):
+                gray = QtGui.qGray(retImage.pixel(i, j))
+                retImage.setPixel(i, j, QtGui.QColor(gray, gray, gray).rgb())
+                buf[i][j] = 1-gray
+        retImage.save("result.png")
+        print buf/255
     
     def isModified(self):
         return self.modified
@@ -254,6 +268,7 @@ class MainWindow(QtGui.QMainWindow):
 
     def run(self):
         print "Run"
+        self.centWidget.scribbleArea.prepareImage()
 
     def initializeNetwork(self):
         if self.timer.isActive():
