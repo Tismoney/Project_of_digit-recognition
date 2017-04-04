@@ -11,17 +11,6 @@ from mnist import load_dataset
 
 from PyQt4.QtCore import QObject, pyqtSignal
 
-'''
-class Foo(QObject):
-
-	newEpoch = pyqtSignal(int, name = 'newEpoch')
-
-	def Emit(self, index):
-		#self.newEpoch.connect(rt.MainWindow.timerEvent)
-		self.newEpoch.emit(index)
-'''
-
-
 def iterate_minibatches(inputs, targets, batchsize, shuffle=False):
 	assert len(inputs) == len(targets)
 	if shuffle:
@@ -36,6 +25,8 @@ def iterate_minibatches(inputs, targets, batchsize, shuffle=False):
 
 class NerNet():
 
+	new_epoch = pyqtSignal(int, name='new_epoch')
+
 	def __init__(self, parent = None):
 		self.train_X = 0
 		self.train_y = 0
@@ -45,7 +36,6 @@ class NerNet():
 		self.val_y = 0
 		self.batch_size = 50
 		self.num_epochs = 10
-		self.is_fit = 0
 
 	def accuarcy_fun():
 		return
@@ -62,7 +52,7 @@ class NerNet():
 		self.val_X = X_val
 		self.val_y = y_val
 
-	def make_and_fit(self):
+	def make_and_fit(self, timer):
 		
 		input_X = T.tensor4('Input')
 		target_y = T.vector('Target', dtype='int32')
@@ -106,8 +96,7 @@ class NerNet():
 
 		    
 		    # Then we print the results for this epoch:
-		    #foo.Emit(epoch + 1)
-
+		    new_epoch.emit(epoch + 1)
 		    print("Epoch {} of {} took {:.3f}s".format(
 		        epoch + 1, self.num_epochs, time.time() - start_time))
 
@@ -116,7 +105,6 @@ class NerNet():
 		        train_acc / train_batches * 100))
 		    print("  validation accuracy:\t\t{:.2f} %".format(
 		        val_acc / val_batches * 100))
-		self.is_fit = 1
 
 	def get_accuracy(self):
 		test_acc = 0
@@ -136,13 +124,4 @@ class NerNet():
 		y_pred = np.array(y_pred)
 		pred_num = y_pred[y_pred.argmax()]
 		print("Predict is {} with accuracy {}".format(y_pred, ))
-
-
-if __name__ == '__main__':
-
-	net = NerNet()
-	net.init_data()
-	net.make_and_fit()
-	net.get_accuracy()
-
 

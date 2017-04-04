@@ -1,4 +1,4 @@
-#!/home/paul/anaconda2/bin/python2.7
+#!/usr/bin/python
 
 import sys
 from PyQt4 import QtCore, QtGui
@@ -258,7 +258,10 @@ class MainWindow(QtGui.QMainWindow):
         self.setlabl()
 
         self.timer = QtCore.QBasicTimer()
-        self.initializeNetwork()
+        #self.initializeNetwork()
+        self.net = NerNet.NerNet()
+        self.net.init_data()
+        #Need to conect
 
     def setlabl(self):
         if self.networkReady == 100:
@@ -269,11 +272,16 @@ class MainWindow(QtGui.QMainWindow):
     def run(self):
         print "Run"
         self.centWidget.scribbleArea.prepareImage()
+        #Get result with net
+        #self.net.result(...)
 
     def initializeNetwork(self):
         if self.timer.isActive():
             self.timer.stop()
         else:
+            #Fit a net
+            #self.net.make_and_fit()
+            #self.net.get_accuracy() - init area
             self.timer.start(100, self)
             self.centWidget.runBtn.setEnabled(False)
             self.centWidget.fitBtn.setEnabled(False)
