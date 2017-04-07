@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/home/paul/anaconda2/bin/python2.7
 
 import sys
 from PyQt4 import QtCore, QtGui
@@ -261,6 +261,7 @@ class MainWindow(QtGui.QMainWindow):
         #self.initializeNetwork()
         self.net = NerNet.NerNet()
         self.net.init_data()
+        self.net.signalConnect(self.epochEvent)
         #Need to conect
 
     def setlabl(self):
@@ -276,25 +277,22 @@ class MainWindow(QtGui.QMainWindow):
         #self.net.result(...)
 
     def initializeNetwork(self):
-        if self.timer.isActive():
-            self.timer.stop()
-        else:
-            #Fit a net
-            #self.net.make_and_fit()
-            #self.net.get_accuracy() - init area
-            self.timer.start(100, self)
-            self.centWidget.runBtn.setEnabled(False)
-            self.centWidget.fitBtn.setEnabled(False)
-    """???????????????????????????????????????????????"""
-    def timerEvent(self, event): 
-        if self.networkReady >= 100:
-            self.timer.stop()
-            self.networkReady = 0
+        #Fit a net
+        #self.net.get_accuracy() - init area
+        self.networkReady = 0
+        self.centWidget.runBtn.setEnabled(False)
+        self.centWidget.fitBtn.setEnabled(False)
+        self.net.make_and_fit()
+    
+    def epochEvent(self, epoch):
+        self.networkReady = self.networkReady + 10
+        self.progBar.setValue(self.networkReady)
+        if epoch == 10:
             self.centWidget.runBtn.setEnabled(True)
             self.centWidget.fitBtn.setEnabled(True)
+            self.setlabl()
+            self.networkReady = 0
             return
-        self.networkReady = self.networkReady + 1
-        self.progBar.setValue(self.networkReady)
         self.setlabl()
 
     def open(self):

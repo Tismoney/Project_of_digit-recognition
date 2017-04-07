@@ -23,11 +23,10 @@ def iterate_minibatches(inputs, targets, batchsize, shuffle=False):
 	        excerpt = slice(start_idx, start_idx + batchsize)
 	    yield inputs[excerpt], targets[excerpt]
 
-class NerNet():
-
+class NerNet(QObject):
 	new_epoch = pyqtSignal(int, name='new_epoch')
-
 	def __init__(self, parent = None):
+		super(NerNet, self).__init__(parent)
 		self.train_X = 0
 		self.train_y = 0
 		self.test_X = 0
@@ -35,7 +34,10 @@ class NerNet():
 		self.val_X = 0
 		self.val_y = 0
 		self.batch_size = 50
-		self.num_epochs = 10
+		self.num_epochs = 10 # it must be 10
+
+	def signalConnect(self, obj):
+		self.new_epoch.connect(obj)
 
 	def accuarcy_fun():
 		return
@@ -52,7 +54,7 @@ class NerNet():
 		self.val_X = X_val
 		self.val_y = y_val
 
-	def make_and_fit(self, timer):
+	def make_and_fit(self):
 		
 		input_X = T.tensor4('Input')
 		target_y = T.vector('Target', dtype='int32')
@@ -96,7 +98,7 @@ class NerNet():
 
 		    
 		    # Then we print the results for this epoch:
-		    new_epoch.emit(epoch + 1)
+		    self.new_epoch.emit(epoch + 1)
 		    print("Epoch {} of {} took {:.3f}s".format(
 		        epoch + 1, self.num_epochs, time.time() - start_time))
 
