@@ -1,4 +1,4 @@
-#!/home/paul/anaconda2/bin/python2.7
+#!/usr/bin/python
 
 import sys
 from PyQt4 import QtCore, QtGui
@@ -109,12 +109,12 @@ class ScribbleArea(QtGui.QWidget):
     def prepareImage(self):
         newSize = QtCore.QSize(28, 28)
         retImage = self.image.scaled(newSize)
-        buf = np.ndarray((28, 28))
+        buf = np.ndarray((1, 28, 28))
         for i in range(28):
             for j in range(28):
                 gray = QtGui.qGray(retImage.pixel(i, j))
                 retImage.setPixel(i, j, QtGui.QColor(gray, gray, gray).rgb())
-                buf[i][j] = 1-gray
+                buf[0][i][j] = 1-gray
         retImage.save("result.png")
         print buf/255
     
@@ -272,9 +272,10 @@ class MainWindow(QtGui.QMainWindow):
 
     def run(self):
         print "Run"
-        self.centWidget.scribbleArea.prepareImage()
+        print(self.net.get_result(self.centWidget.scribbleArea.prepareImage()))
         #Get result with net
         #self.net.result(...)
+
 
     def initializeNetwork(self):
         #Fit a net
