@@ -35,6 +35,7 @@ class NerNet(QObject):
 		self.val_y = 0
 		self.batch_size = 50
 		self.num_epochs = 10 # it must be 10
+		self.acc = 0
 
 	def signalConnect(self, obj):
 		self.new_epoch.connect(obj)
@@ -109,21 +110,26 @@ class NerNet(QObject):
 		        val_acc / val_batches * 100))
 
 	def get_accuracy(self):
-		test_acc = 0
-		test_batches = 0
-		for batch in iterate_minibatches(self.test_X, self.test_y, 500):
-		    inputs, targets = batch
-		    acc = self.accuracy_fun(inputs, targets)
-		    test_acc += acc
-		    test_batches += 1
-		print("Final results:")
-		print("  test accuracy:\t\t{:.2f} %".format(test_acc / test_batches * 100))
-		return test_acc / test_batches * 100
+		if (self.acc == 0): 
+			test_acc = 0
+			test_batches = 0
+			for batch in iterate_minibatches(self.test_X, self.test_y, 500):
+			    inputs, targets = batch
+			    acc = self.accuracy_fun(inputs, targets)
+			    test_acc += acc
+			    test_batches += 1
+			print("Final results:")
+			print("  test accuracy:\t\t{:.2f} %".format(test_acc / test_batches * 100))
+			self.acc = test_acc / test_batches * 100
+			return test_acc / test_batches * 100
+		else:
+			return self.acc
 
 
 	def get_result(self, X):
 		y_pred = self.pred_fun(X)
 		y_pred = np.array(y_pred)
 		pred_num = y_pred[y_pred.argmax()]
-		print("Predict is {} with accuracy {}".format(y_pred, ))
+		print("Predict is {} with accuracy {}".format(pred_num, self.acc))
+		return pred_num
 
