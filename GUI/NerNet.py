@@ -1,7 +1,8 @@
-#!/usr/bin/python
+#!/home/paul/anaconda2/bin/python2.7
 
 
 import lasagne
+import theano
 from theano import tensor as T
 from lasagne.nonlinearities import *
 import numpy as np
@@ -128,8 +129,9 @@ class NerNet(QObject):
 
 	def get_result(self, X):
 		y_pred = self.pred_fun(X)
+		print y_pred
 		y_pred = np.array(y_pred)
-		pred_num = y_pred[y_pred.argmax()]
+		pred_num = y_pred[0][y_pred.argmax()]
 		print("Predict is {} with accuracy {}".format(pred_num, self.acc))
 		return pred_num
 

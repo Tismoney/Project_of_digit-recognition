@@ -1,4 +1,5 @@
-#!/usr/bin/python
+#!/home/paul/anaconda2/bin/python
+
 
 import sys
 from PyQt4 import QtCore, QtGui
@@ -12,7 +13,7 @@ class ScribbleArea(QtGui.QWidget):
         self.setAttribute(QtCore.Qt.WA_StaticContents)
         self.modified = False
         self.scribbling = False
-        self.myPenWidth = 1
+        self.myPenWidth = 50
         self.myPenColor = QtCore.Qt.blue
         self.image = QtGui.QImage()
         self.lastPoint = QtCore.QPoint()
@@ -109,14 +110,15 @@ class ScribbleArea(QtGui.QWidget):
     def prepareImage(self):
         newSize = QtCore.QSize(28, 28)
         retImage = self.image.scaled(newSize)
-        buf = np.ndarray((1, 28, 28))
+        buf = np.ndarray((1, 1, 28, 28))
         for i in range(28):
             for j in range(28):
                 gray = QtGui.qGray(retImage.pixel(i, j))
                 retImage.setPixel(i, j, QtGui.QColor(gray, gray, gray).rgb())
-                buf[0][i][j] = 1-gray
+                buf[0][0][i][j] = 1-gray/255.
         retImage.save("result.png")
-        print buf/255
+        print buf
+        return buf
     
     def isModified(self):
         return self.modified
@@ -286,9 +288,9 @@ class MainWindow(QtGui.QMainWindow):
         self.net.make_and_fit()
     
     def epochEvent(self, epoch):
-        self.networkReady = self.networkReady + 10
+        self.networkReady = self.networkReady + 10 #10
         self.progBar.setValue(self.networkReady)
-        if epoch == 10:
+        if epoch == 10:#10
             self.centWidget.runBtn.setEnabled(True)
             self.centWidget.fitBtn.setEnabled(True)
             self.setlabl()
