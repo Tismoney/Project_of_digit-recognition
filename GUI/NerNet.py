@@ -61,9 +61,13 @@ class NerNet(QObject):
 		input_X = T.tensor4('Input')
 		target_y = T.vector('Target', dtype='int32')
 
-		input_layer  = lasagne.layers.InputLayer(shape=(None,1,28,28), input_var=input_X, name = "Input")
-		dense_layer  = lasagne.layers.DenseLayer(input_layer, num_units=100, nonlinearity=sigmoid, name = "Dense")
-		output_layer = lasagne.layers.DenseLayer(dense_layer,num_units = 10, nonlinearity=softmax, name = "Output")
+		input_layer   = lasagne.layers.InputLayer(shape=(None,1,28,28), input_var=input_X, name = "Input")
+		drop_layer    = lasagne.layers.DropoutLayer(input_layer, p=0.2)
+		dense_1_layer = lasagne.layers.DenseLayer(drop_layer, num_units=100, nonlinearity=sigmoid, name = "Dense_1")
+		drop_layer    = lasagne.layers.DropoutLayer(dense_1_layer, p=0.2)
+		dense_2_layer = lasagne.layers.DenseLayer(drop_layer, num_units=100, nonlinearity=rectify, name = "Dense_2")
+		drop_layer    = lasagne.layers.DropoutLayer(dense_2_layer, p=0.2)
+		output_layer  = lasagne.layers.DenseLayer(drop_layer,num_units = 10, nonlinearity=softmax, name = "Output")
 
 		y_predicted = lasagne.layers.get_output(output_layer)
 		all_weights = lasagne.layers.get_all_params(output_layer)
@@ -128,6 +132,7 @@ class NerNet(QObject):
 
 
 	def get_result(self, X):
+		self.get_accuracy()
 		y_pred = self.pred_fun(X)
 		#print y_pred
 		y_pred = np.array(y_pred)
