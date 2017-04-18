@@ -13,8 +13,8 @@ class ScribbleArea(QtGui.QWidget):
         self.setAttribute(QtCore.Qt.WA_StaticContents)
         self.modified = False
         self.scribbling = False
-        self.myPenWidth = 50
-        self.myPenColor = QtCore.Qt.blue
+        self.myPenWidth = 30
+        self.myPenColor = QtCore.Qt.black
         self.image = QtGui.QImage()
         self.lastPoint = QtCore.QPoint()
 
@@ -75,7 +75,7 @@ class ScribbleArea(QtGui.QWidget):
         if self.width() > self.image.width() or self.height() > self.image.height():
             newWidth = max(self.width() + 128, self.image.width())
             newHeight = max(self.height() + 128, self.image.height())
-            self.resizeImage(self.image, QtCore.QSize(newWidth, newHeight))
+            self.resizeImage(self.image, QtCore.QSize(400, 400))
             self.update()
 
         QtGui.QWidget.resizeEvent(self, event)
@@ -113,9 +113,9 @@ class ScribbleArea(QtGui.QWidget):
         buf = np.ndarray((1, 1, 28, 28))
         for i in range(28):
             for j in range(28):
-                gray = QtGui.qGray(retImage.pixel(i, j))
+                gray = QtGui.qGray(retImage.pixel(27-i, 27-j))
                 retImage.setPixel(i, j, QtGui.QColor(gray, gray, gray).rgb())
-                buf[0][0][i][j] = 1-gray/255.
+                buf[0][0][j][i] = 1-gray/255.
         retImage.save("result.png")
         print buf
         return buf
@@ -239,6 +239,7 @@ class MainWindow(QtGui.QMainWindow):
         self.saveAsActs = []
         self.centWidget = FormWidget(self)
         self.setCentralWidget(self.centWidget)
+        self.test = None
 
         self.createActions()
         self.createMenus()
@@ -274,7 +275,7 @@ class MainWindow(QtGui.QMainWindow):
 
     def run(self):
         print "Run"
-        print(self.net.get_result(self.centWidget.scribbleArea.prepareImage()))
+        self.net.get_result(self.centWidget.scribbleArea.prepareImage())
         #Get result with net
         #self.net.result(...)
 
