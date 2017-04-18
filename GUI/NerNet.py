@@ -35,7 +35,7 @@ class NerNet(QObject):
 		self.val_X = 0
 		self.val_y = 0
 		self.batch_size = 50
-		self.num_epochs = 10 # it must be 10
+		self.num_epochs = 20 # it must be 10
 		self.acc = 0
 
 	def signalConnect(self, obj):
@@ -61,13 +61,15 @@ class NerNet(QObject):
 		input_X = T.tensor4('Input')
 		target_y = T.vector('Target', dtype='int32')
 
-		input_layer   = lasagne.layers.InputLayer(shape=(None,1,28,28), input_var=input_X, name = "Input")
-		drop_layer    = lasagne.layers.DropoutLayer(input_layer, p=0.2)
-		dense_1_layer = lasagne.layers.DenseLayer(drop_layer, num_units=100, nonlinearity=sigmoid, name = "Dense_1")
-		drop_layer    = lasagne.layers.DropoutLayer(dense_1_layer, p=0.2)
-		dense_2_layer = lasagne.layers.DenseLayer(drop_layer, num_units=100, nonlinearity=rectify, name = "Dense_2")
-		drop_layer    = lasagne.layers.DropoutLayer(dense_2_layer, p=0.2)
-		output_layer  = lasagne.layers.DenseLayer(drop_layer,num_units = 10, nonlinearity=softmax, name = "Output")
+		input_layer   = lasagne.layers.InputLayer   (shape=(None,1,28,28), input_var=input_X, name = "Input")
+		drop_layer    = lasagne.layers.DropoutLayer (input_layer, p=0.2)
+		dense_1_layer = lasagne.layers.DenseLayer   (drop_layer, num_units=200, nonlinearity=rectify, name = "Dense_1")
+		drop_layer    = lasagne.layers.DropoutLayer (dense_1_layer, p=0.3)
+		dense_2_layer = lasagne.layers.DenseLayer   (drop_layer, num_units=100, nonlinearity=sigmoid, name = "Dense_2")
+		drop_layer    = lasagne.layers.DropoutLayer (dense_2_layer, p=0.3)
+		dense_3_layer = lasagne.layers.DenseLayer   (drop_layer, num_units=50, nonlinearity=rectify, name = "Dense_3")
+		drop_layer    = lasagne.layers.DropoutLayer (dense_3_layer, p=0.3)
+		output_layer  = lasagne.layers.DenseLayer   (drop_layer,num_units = 10, nonlinearity=softmax, name = "Output")
 
 		y_predicted = lasagne.layers.get_output(output_layer)
 		all_weights = lasagne.layers.get_all_params(output_layer)
@@ -83,6 +85,7 @@ class NerNet(QObject):
 		#foo = Foo()
 		for epoch in range(self.num_epochs):
 		    # In each epoch, we do a full pass over the training data:
+		    self.new_epoch.emit(epoch + 1)
 		    train_err = 0
 		    train_acc = 0
 		    train_batches = 0
@@ -104,7 +107,7 @@ class NerNet(QObject):
 
 		    
 		    # Then we print the results for this epoch:
-		    self.new_epoch.emit(epoch + 1)
+		    
 		    print("Epoch {} of {} took {:.3f}s".format(
 		        epoch + 1, self.num_epochs, time.time() - start_time))
 
