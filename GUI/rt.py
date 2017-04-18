@@ -1,4 +1,4 @@
-#!/home/paul/anaconda2/bin/python
+#!/usr/bin/python
 
 
 import sys
@@ -109,7 +109,7 @@ class ScribbleArea(QtGui.QWidget):
 
     def prepareImage(self):
         newSize = QtCore.QSize(28, 28)
-        retImage = self.image.scaled(newSize, transformMode = QtCore.Qt.SmoothTransformation)
+        retImage = self.image.scaled(newSize, transformMode = QtCore.Qt.SmoothTransformation) #transformMode = QtCore.Qt.SmoothTransformation
         buf = np.ndarray((1, 1, 28, 28))
         for i in xrange(28):
             for j in xrange(28):
@@ -117,6 +117,8 @@ class ScribbleArea(QtGui.QWidget):
                 retImage.setPixel(i, j, QtGui.QColor(gray, gray, gray).rgb())
                 buf[0][0][j][i] = 1-gray/255.
         retImage.save("result.png")
+        with open("1.txt", 'w') as f:
+            f.write(str(buf))
         return buf
     
     def isModified(self):
