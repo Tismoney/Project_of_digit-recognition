@@ -109,15 +109,14 @@ class ScribbleArea(QtGui.QWidget):
 
     def prepareImage(self):
         newSize = QtCore.QSize(28, 28)
-        retImage = self.image.scaled(newSize)
+        retImage = self.image.scaled(newSize, transformMode = QtCore.Qt.SmoothTransformation)
         buf = np.ndarray((1, 1, 28, 28))
-        for i in range(28):
-            for j in range(28):
-                gray = QtGui.qGray(retImage.pixel(27-i, 27-j))
+        for i in xrange(28):
+            for j in xrange(28):
+                gray = QtGui.qGray(retImage.pixel(i, j))
                 retImage.setPixel(i, j, QtGui.QColor(gray, gray, gray).rgb())
                 buf[0][0][j][i] = 1-gray/255.
         retImage.save("result.png")
-        print buf
         return buf
     
     def isModified(self):
