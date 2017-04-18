@@ -290,9 +290,9 @@ class MainWindow(QtGui.QMainWindow):
         self.net.make_and_fit()
     
     def epochEvent(self, epoch):
-        self.networkReady = self.networkReady + 10 #10
+        self.networkReady = self.networkReady + 100 / self.net.num_epochs #10
         self.progBar.setValue(self.networkReady)
-        if epoch == 10:#10
+        if epoch == self.net.num_epochs:#10
             self.centWidget.runBtn.setEnabled(True)
             self.centWidget.fitBtn.setEnabled(True)
             self.setlabl()
