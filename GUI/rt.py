@@ -287,17 +287,18 @@ class MainWindow(QtGui.QMainWindow):
         self.networkReady = 0
         self.centWidget.runBtn.setEnabled(False)
         self.centWidget.fitBtn.setEnabled(False)
-        self.net.make_and_fit()
+        self.net.make_and_check()
     
     def epochEvent(self, epoch):
-        self.networkReady = self.networkReady + 100 / self.net.num_epochs #10
-        self.progBar.setValue(self.networkReady)
         if epoch == self.net.num_epochs:#10
             self.centWidget.runBtn.setEnabled(True)
             self.centWidget.fitBtn.setEnabled(True)
+            self.progBar.setValue(100)
             self.setlabl()
             self.networkReady = 0
             return
+        self.networkReady = self.networkReady + 100 / self.net.num_epochs #10
+        self.progBar.setValue(self.networkReady)
         self.setlabl()
 
     def open(self):

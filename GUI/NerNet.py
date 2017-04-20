@@ -7,6 +7,8 @@ from theano import tensor as T
 from lasagne.nonlinearities import *
 import numpy as np
 import time
+import os
+import pandas as pd
 
 from mnist import load_dataset
 
@@ -35,7 +37,7 @@ class NerNet(QObject):
 		self.val_X = 0
 		self.val_y = 0
 		self.batch_size = 50
-		self.num_epochs = 20 # it must be 10
+		self.num_epochs = 50 # it must be 10
 		self.acc = 0
 
 	def signalConnect(self, obj):
@@ -56,6 +58,21 @@ class NerNet(QObject):
 		self.val_X = X_val
 		self.val_y = y_val
 
+	def put_weights(self, weights, path = "Weight"):
+		for i, weight in enumerate(weights):
+		    p = weight.get_value()
+		    matrix = pd.DataFrame(p)
+		    matrix.to_csv(path + "/" + str(i) + ".csv")
+
+	def get_weight(self, path = "Weight"):
+		weights = []
+		num_files = len(os.listdir(path))
+		for i in range(num_files):
+		    matrix = pd.read_csv(path + "/" + str(i) + ".csv")
+		    weight = np.delete(matrix.as_matrix(), [0], axis=1)
+		    weights.append(weight)
+		return weights
+
 	def make_and_fit(self):
 		
 		input_X = T.tensor4('Input')
@@ -64,11 +81,11 @@ class NerNet(QObject):
 		input_layer   = lasagne.layers.InputLayer   (shape=(None,1,28,28), input_var=input_X, name = "Input")
 		drop_layer    = lasagne.layers.DropoutLayer (input_layer, p=0.2)
 		dense_1_layer = lasagne.layers.DenseLayer   (drop_layer, num_units=200, nonlinearity=rectify, name = "Dense_1")
-		drop_layer    = lasagne.layers.DropoutLayer (dense_1_layer, p=0.3)
+		drop_layer    = lasagne.layers.DropoutLayer (dense_1_layer, p=0.2)
 		dense_2_layer = lasagne.layers.DenseLayer   (drop_layer, num_units=100, nonlinearity=sigmoid, name = "Dense_2")
-		drop_layer    = lasagne.layers.DropoutLayer (dense_2_layer, p=0.3)
+		drop_layer    = lasagne.layers.DropoutLayer (dense_2_layer, p=0.2)
 		dense_3_layer = lasagne.layers.DenseLayer   (drop_layer, num_units=50, nonlinearity=rectify, name = "Dense_3")
-		drop_layer    = lasagne.layers.DropoutLayer (dense_3_layer, p=0.3)
+		drop_layer    = lasagne.layers.DropoutLayer (dense_3_layer, p=0.2)
 		output_layer  = lasagne.layers.DenseLayer   (drop_layer,num_units = 10, nonlinearity=softmax, name = "Output")
 
 		y_predicted = lasagne.layers.get_output(output_layer)
@@ -117,6 +134,45 @@ class NerNet(QObject):
 		    print("  validation accuracy:\t\t{:.2f} %".format(
 		        val_acc / val_batches * 100))
 
+            	self.put_weights(all_weights)
+
+	def make_and_get(self):
+		weig = self.get_weight()
+
+		input_X = T.tensor4('Input')
+		target_y = T.vector('Target', dtype='int32')
+
+		input_layer   = lasagne.layers.InputLayer   (shape=(None,1,28,28), input_var=input_X, name = "Input")
+		drop_layer    = lasagne.layers.DropoutLayer (input_layer, p=0.2)
+		dense_1_layer = lasagne.layers.DenseLayer   (drop_layer, num_units=200, nonlinearity=rectify, name = "Dense_1", 
+		                                                W = weig[0], b = weig[1].reshape(weig[1].shape[0], ))
+		drop_layer    = lasagne.layers.DropoutLayer (dense_1_layer, p=0.2)
+		dense_2_layer = lasagne.layers.DenseLayer   (drop_layer, num_units=100, nonlinearity=sigmoid, name = "Dense_2",
+		                                                W = weig[2], b = weig[3].reshape(weig[3].shape[0], ))
+		drop_layer    = lasagne.layers.DropoutLayer (dense_2_layer, p=0.2)
+		dense_3_layer = lasagne.layers.DenseLayer   (drop_layer, num_units=50, nonlinearity=rectify, name = "Dense_3", 
+		                                                W = weig[4], b = weig[5].reshape(weig[5].shape[0], ))
+		drop_layer    = lasagne.layers.DropoutLayer (dense_3_layer, p=0.2)
+		output_layer  = lasagne.layers.DenseLayer   (drop_layer,num_units = 10, nonlinearity=softmax, name = "Output", 
+		                                                W = weig[6], b = weig[7].reshape(weig[7].shape[0], ))
+
+		y_predicted = lasagne.layers.get_output(output_layer)
+		all_weights = lasagne.layers.get_all_params(output_layer)
+
+		loss = lasagne.objectives.categorical_crossentropy(y_predicted,target_y).mean()
+		accuracy = lasagne.objectives.categorical_accuracy(y_predicted,target_y).mean()
+		updates_sgd = lasagne.updates.rmsprop(loss, all_weights,learning_rate=0.01)
+
+		train_fun = theano.function([input_X,target_y],[loss,accuracy],updates= updates_sgd)
+		self.accuracy_fun = theano.function([input_X,target_y],accuracy)
+		self.pred_fun = theano.function([input_X], y_predicted)
+		self.new_epoch.emit(self.num_epochs)
+
+
+	def make_and_check(self, path = "Weight"):
+		if (len(os.listdir(path)) == 0): self.make_and_fit()
+		else: self.make_and_get() 
+
 	def get_accuracy(self):
 		if (self.acc == 0): 
 			test_acc = 0
@@ -137,9 +193,10 @@ class NerNet(QObject):
 	def get_result(self, X):
 		self.get_accuracy()
 		y_pred = self.pred_fun(X)
-		#print y_pred
+		
 		y_pred = np.array(y_pred)
+		#print y_pred
 		pred_num = y_pred.argmax()
-		print("Predict is {} with accuracy {}".format(pred_num, self.acc))
-		return pred_num
-
+		pred_prob = y_pred[0, pred_num] * self.acc
+		print("Predict is {} with probabylity {} %".format(pred_num, pred_prob))
+		return pred_num, pred_prob
