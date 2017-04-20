@@ -6,8 +6,8 @@ More information can be found in [SDP][]
 
 ## Developers
 
-*[Pavel][]    
-*[Nikita][]
+* [Pavel][]    
+* [Nikita][]
 
 [SDP]: ./SDP/SDP.pdf
 [Pavel]: https://github.com/PaulZakharov
