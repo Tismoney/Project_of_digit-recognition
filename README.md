@@ -5,7 +5,7 @@ Project of 4th semester of MIPT.
 More information can be found in [SDP][]
 
 ## Developers
-+[Pavel][]
++[Pavel][]    
 +[Nikita][]
 
 [SDP]: ./SDP/SDP.pdf
