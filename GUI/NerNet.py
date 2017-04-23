@@ -29,26 +29,26 @@ def iterate_minibatches(inputs, targets, batchsize, shuffle=False):
 def architecture_one(input_X, weight = False, weig = None):
 	if (weight == False):
 		input_layer   = lasagne.layers.InputLayer   (shape=(None,1,28,28), input_var=input_X, name = "Input")
-		drop_layer    = lasagne.layers.DropoutLayer (input_layer, p=0.05)
+		drop_layer    = lasagne.layers.DropoutLayer (input_layer, p=0.2)
 		dense_1_layer = lasagne.layers.DenseLayer   (drop_layer, num_units=200, nonlinearity=rectify, name = "Dense_1")
-		drop_layer    = lasagne.layers.DropoutLayer (dense_1_layer, p=0.2)
+		drop_layer    = lasagne.layers.DropoutLayer (dense_1_layer, p=0.5)
 		dense_2_layer = lasagne.layers.DenseLayer   (drop_layer, num_units=100, nonlinearity=sigmoid, name = "Dense_2")
-		drop_layer    = lasagne.layers.DropoutLayer (dense_2_layer, p=0.2)
+		drop_layer    = lasagne.layers.DropoutLayer (dense_2_layer, p=0.5)
 		dense_3_layer = lasagne.layers.DenseLayer   (drop_layer, num_units=50, nonlinearity=rectify, name = "Dense_3")
-		drop_layer    = lasagne.layers.DropoutLayer (dense_3_layer, p=0.2)
+		drop_layer    = lasagne.layers.DropoutLayer (dense_3_layer, p=0.5)
 		output_layer  = lasagne.layers.DenseLayer   (drop_layer,num_units = 10, nonlinearity=softmax, name = "Output")
 	else:
 		input_layer   = lasagne.layers.InputLayer   (shape=(None,1,28,28), input_var=input_X, name = "Input")
-		drop_layer    = lasagne.layers.DropoutLayer (input_layer, p=0.05)
+		drop_layer    = lasagne.layers.DropoutLayer (input_layer, p=0.2)
 		dense_1_layer = lasagne.layers.DenseLayer   (drop_layer, num_units=200, nonlinearity=rectify, name = "Dense_1", 
 		                                                W = weig[0], b = weig[1].reshape(weig[1].shape[0], ))
-		drop_layer    = lasagne.layers.DropoutLayer (dense_1_layer, p=0.2)
+		drop_layer    = lasagne.layers.DropoutLayer (dense_1_layer, p=0.5)
 		dense_2_layer = lasagne.layers.DenseLayer   (drop_layer, num_units=100, nonlinearity=sigmoid, name = "Dense_2",
 		                                                W = weig[2], b = weig[3].reshape(weig[3].shape[0], ))
-		drop_layer    = lasagne.layers.DropoutLayer (dense_2_layer, p=0.2)
+		drop_layer    = lasagne.layers.DropoutLayer (dense_2_layer, p=0.5)
 		dense_3_layer = lasagne.layers.DenseLayer   (drop_layer, num_units=50, nonlinearity=rectify, name = "Dense_3", 
 		                                                W = weig[4], b = weig[5].reshape(weig[5].shape[0], ))
-		drop_layer    = lasagne.layers.DropoutLayer (dense_3_layer, p=0.2)
+		drop_layer    = lasagne.layers.DropoutLayer (dense_3_layer, p=0.5)
 		output_layer  = lasagne.layers.DenseLayer   (drop_layer,num_units = 10, nonlinearity=softmax, name = "Output", 
 		                                                W = weig[6], b = weig[7].reshape(weig[7].shape[0], ))
 	return output_layer
@@ -56,19 +56,42 @@ def architecture_one(input_X, weight = False, weig = None):
 def architecture_two(input_X, weight = False, weig = None):
 	if (weight == False):
 		input_layer   = lasagne.layers.InputLayer   (shape=(None,1,28,28), input_var=input_X, name = "Input")
-		drop_layer    = lasagne.layers.DropoutLayer (input_layer, p=0.05)
-		dense_layer   = lasagne.layers.DenseLayer   (drop_layer, num_units=800, nonlinearity=rectify, name = "Dense_1")
-		drop_layer    = lasagne.layers.DropoutLayer (dense_layer, p=0.2)
+		drop_layer    = lasagne.layers.DropoutLayer (input_layer, p=0.2)
+		dense_layer   = lasagne.layers.DenseLayer   (drop_layer, num_units=800, nonlinearity=rectify, name = "Dense")
+		drop_layer    = lasagne.layers.DropoutLayer (dense_layer, p=0.5)
 		output_layer  = lasagne.layers.DenseLayer   (drop_layer,num_units = 10, nonlinearity=softmax, name = "Output")
 	else:
 		input_layer   = lasagne.layers.InputLayer   (shape=(None,1,28,28), input_var=input_X, name = "Input")
-		drop_layer    = lasagne.layers.DropoutLayer (input_layer, p=0.05)
-		dense_layer   = lasagne.layers.DenseLayer   (drop_layer, num_units=800, nonlinearity=rectify, name = "Dense_1",
+		drop_layer    = lasagne.layers.DropoutLayer (input_layer, p=0.5)
+		dense_layer   = lasagne.layers.DenseLayer   (drop_layer, num_units=800, nonlinearity=rectify, name = "Dense",
 					                                    W = weig[0], b = weig[1].reshape(weig[1].shape[0], ))
-		drop_layer    = lasagne.layers.DropoutLayer (dense_layer, p=0.2)
+		drop_layer    = lasagne.layers.DropoutLayer (dense_layer, p=0.5)
 		output_layer  = lasagne.layers.DenseLayer   (drop_layer,num_units = 10, nonlinearity=softmax, name = "Output",
 					                                    W = weig[2], b = weig[3].reshape(weig[3].shape[0], ))
 	return output_layer
+
+def architecture_three(input_X, weight = False, weig = None):
+	if (weight == False):
+		input_layer   = lasagne.layers.InputLayer    (shape=(None,1,28,28), input_var=input_X, name = "Input")
+		conv_layer    = lasagne.layers.Conv2DLayer   (input_layer, num_filters = 32, filter_size = (5, 5), nonlinearity=rectify, name = "Conv2D")
+		maxpool_layer = lasagne.layers.MaxPool2DLayer(conv_layer, pool_size = (2,2), name = "MaxPool")
+		drop_layer    = lasagne.layers.DropoutLayer  (maxpool_layer, p=0.5) 
+		dense_layer   = lasagne.layers.DenseLayer    (drop_layer, num_units=256, nonlinearity=rectify, name = "Dense")
+		drop_layer    = lasagne.layers.DropoutLayer  (dense_layer, p=0.5)
+		output_layer  = lasagne.layers.DenseLayer    (drop_layer,num_units = 10, nonlinearity=softmax, name = "Output")
+	else:
+		input_layer   = lasagne.layers.InputLayer    (shape=(None,1,28,28), input_var=input_X, name = "Input")
+		conv_layer    = lasagne.layers.Conv2DLayer   (input_layer, num_filters = 32, filter_size = (5, 5), nonlinearity=rectify, name = "Conv2D",
+					                                    W = weig[0], b = weig[1].reshape(weig[1].shape[0], ))
+		maxpool_layer = lasagne.layers.MaxPool2DLayer(conv_layer, pool_size = (2,2), name = "MaxPool",
+					                                    W = weig[2], b = weig[3].reshape(weig[3].shape[0], ))
+		drop_layer    = lasagne.layers.DropoutLayer  (maxpool_layer, p=0.5) 
+		dense_layer   = lasagne.layers.DenseLayer    (drop_layer, num_units=256, nonlinearity=rectify, name = "Dense",
+					                                    W = weig[4], b = weig[5].reshape(weig[5].shape[0], ))
+		drop_layer    = lasagne.layers.DropoutLayer  (dense_layer, p=0.5)
+		output_layer  = lasagne.layers.DenseLayer    (drop_layer,num_units = 10, nonlinearity=softmax, name = "Output",
+					                                    W = weig[6], b = weig[7].reshape(weig[7].shape[0], ))
+	return output_layer	
 
 
 class NerNet(QObject):
@@ -82,7 +105,7 @@ class NerNet(QObject):
 		self.val_X = 0
 		self.val_y = 0
 		self.batch_size = 50
-		self.num_epochs = 50 # it must be 10
+		self.num_epochs = 1 # it must be 10
 		self.acc = 0
 
 	def signalConnect(self, obj):
@@ -103,18 +126,22 @@ class NerNet(QObject):
 		self.val_X = X_val
 		self.val_y = y_val
 
-	def put_weights(self, weights, path = "Weight"):
+	def put_weights(self, weights, path = "Weight", conv = False):
 		for i, weight in enumerate(weights):
-		    p = weight.get_value()
-		    matrix = pd.DataFrame(p)
-		    matrix.to_csv(path + "/" + str(i) + ".csv")
+			p = weight.get_value()
+			if ( (conv == True) & (i == 0) ):
+				p = p.reshape(32, 25)
+			matrix = pd.DataFrame(p)
+			matrix.to_csv(path + "/" + str(i) + ".csv")
 
-	def get_weight(self, path = "Weight"):
+	def get_weight(self, path = "Weight", conv = False):
 		weights = []
 		num_files = len(os.listdir(path))
 		for i in range(num_files):
 		    matrix = pd.read_csv(path + "/" + str(i) + ".csv")
 		    weight = np.delete(matrix.as_matrix(), [0], axis=1)
+		    if ( (conv == True) & (i == 0) ):
+				weights = weights.reshape(32, 1, 5, 5)
 		    weights.append(weight)
 		return weights
 
@@ -126,7 +153,7 @@ class NerNet(QObject):
 		input_X = T.tensor4('Input')
 		target_y = T.vector('Target', dtype='int32')
 
-		output_layer = architecture_two(input_X, weight = False)
+		output_layer = architecture_three(input_X, weight = False)
 		y_predicted = lasagne.layers.get_output(output_layer)
 		all_weights = lasagne.layers.get_all_params(output_layer)
 
@@ -172,13 +199,13 @@ class NerNet(QObject):
 		    print("  validation accuracy:\t\t{:.2f} %".format(
 		        val_acc / val_batches * 100))
 
-            	self.put_weights(all_weights)
+            	self.put_weights(all_weights, conv = True)
 
 	def make_and_get(self):
 		input_X = T.tensor4('Input')
 		target_y = T.vector('Target', dtype='int32')
 		
-		output_layer = architecture_two(input_X, weight = True, weig = self.get_weight())
+		output_layer = architecture_three(input_X, weight = True, weig = self.get_weight(conv = True))
 		y_predicted = lasagne.layers.get_output(output_layer)
 		all_weights = lasagne.layers.get_all_params(output_layer)
 

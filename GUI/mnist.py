@@ -46,8 +46,8 @@ def load_dataset():
 
     # We can now download and read the training and test set images and labels.
     X_train = load_mnist_images('train-images-idx3-ubyte.gz')
-    X_train[X_train > 0.3] = 1
-    X_train[X_train <= 0.3] = 0
+    #X_train[X_train > 0.3] = 1
+    #X_train[X_train <= 0.3] = 0
     #with open("1.txt", "w") as f:
       #  f.write(str(X_train[5]))
     y_train = load_mnist_labels('train-labels-idx1-ubyte.gz')
