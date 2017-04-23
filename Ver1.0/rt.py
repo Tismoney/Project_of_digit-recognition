@@ -1,8 +1,8 @@
-#!/usr/bin/python
-
+#!/home/paul/anaconda2/bin/python2.7
 
 import sys
 from PyQt4 import QtCore, QtGui
+import PyQt4
 import NerNet
 import numpy as np
 
@@ -139,21 +139,27 @@ class FormWidget(QtGui.QWidget):
 
         self.exitBtn = QtGui.QPushButton()
         self.runBtn = QtGui.QPushButton()
-        self.aboutBtn = QtGui.QPushButton()
+        self.helpBtn = QtGui.QPushButton()
         self.fitBtn = QtGui.QPushButton()
         self.clearBtn = QtGui.QPushButton()
 
         self.exitIcon = QtGui.QIcon('icons/exit.png')
         self.fitIcon = QtGui.QIcon('icons/repeat.png')
         self.runIcon = QtGui.QIcon('icons/play-button.png')
-        self.aboutIcon = QtGui.QIcon('icons/info.png')
+        self.helpIcon = QtGui.QIcon('icons/info.png')
         self.clearIcon = QtGui.QIcon('icons/garbage.png')
 
         self.exitBtn.setIcon(self.exitIcon)
         self.fitBtn.setIcon(self.fitIcon)
         self.runBtn.setIcon(self.runIcon)
-        self.aboutBtn.setIcon(self.aboutIcon)
+        self.helpBtn.setIcon(self.helpIcon)
         self.clearBtn.setIcon(self.clearIcon)
+
+        self.exitBtn.setToolTip("Exit")
+        self.fitBtn.setToolTip("Fit")
+        self.runBtn.setToolTip("Run")
+        self.helpBtn.setToolTip("Help")
+        self.clearBtn.setToolTip("Clear")
 
         self.ansLabel = QtGui.QLabel("Answer")
         self.sureLabel = QtGui.QLabel("Sure")
@@ -161,7 +167,7 @@ class FormWidget(QtGui.QWidget):
         self.buttonBox.addWidget(self.exitBtn)
         self.buttonBox.addWidget(self.fitBtn)
         self.buttonBox.addWidget(self.runBtn)
-        self.buttonBox.addWidget(self.aboutBtn)
+        self.buttonBox.addWidget(self.helpBtn)
         self.buttonBox.addWidget(self.clearBtn)
 
         self.layout.addLayout(self.buttonBox)
@@ -171,6 +177,37 @@ class FormWidget(QtGui.QWidget):
         self.layout.setStretch(1, 10)
         self.layout.setStretch(2, 1)
         self.layout.setStretch(3, 1)
+
+class ChangeNetWindow(QtGui.QWidget):
+    def __init__(self, network, parent = None):
+        QtGui.QWidget.__init__(self, parent)
+        self.setWindowTitle("Choose architecture")
+        self.layout = QtGui.QVBoxLayout()
+        self.prepareButtons(network)
+        self.layout.addWidget(QtGui.QLabel("Please, choose architecture of a neural net"))
+        self.layout.addWidget(self.dense100Btn)
+        self.layout.addWidget(self.dense800Btn)
+        self.layout.addWidget(self.convBtn)
+        self.setLayout(self.layout)
+        self.show()
+    
+    def prepareButtons(self, network):
+        self.btnBox = QtGui.QButtonGroup()
+        self.dense800Btn = QtGui.QRadioButton("Dense-800")
+        self.dense100Btn = QtGui.QRadioButton("Dense-200-Dense-100-Dense-50")
+        self.convBtn = QtGui.QRadioButton("Conv-32-MaxPool-Dense-256")
+        self.btnBox.addButton(self.dense100Btn, 0)
+        self.btnBox.addButton(self.dense800Btn, 1)
+        self.btnBox.addButton(self.convBtn, 2)
+        self.dense800Btn.setCheckable(True)
+        self.dense100Btn.setCheckable(True)
+        self.convBtn.setCheckable(True)
+        if network == 0:
+            self.dense100Btn.setChecked(True)
+        elif network == 1:
+            self.dense800Btn.setChecked(True)
+        else:
+            self.convBtn.setChecked(True)
 
 
 class AboutWidget(QtGui.QWidget):
@@ -198,8 +235,8 @@ class AboutWidget(QtGui.QWidget):
         self.qtImage.setPixmap(self.qtPixmap)
 
     def createLabels(self):
-        self.miptLabel = QtGui.QLabel("""Project of digit-recognition is made by students of Department of Radioengineering and Cybernetics 
-of Moscow Institute of Physics and Technology - Pavel Zakharov and Nikita Mokrov.\n""")
+        self.miptLabel = QtGui.QLabel("""Project of digit-recognition is made by students of Department of Radioengineering 
+        and Cybernetics of Moscow Institute of Physics and Technology - Pavel Zakharov and Nikita Mokrov.\n""")
         
         self.flaticonLabel = QtGui.QLabel("""<div>Icons made by <a href="http://www.flaticon.com/authors/madebyoliver" title="Madebyoliver">Madebyoliver</a>
          from <a href="http://www.flaticon.com" title="Flaticon">www.flaticon.com</a> is licensed by <a href="http://creativecommons.org/licenses/by/3.0/" 
@@ -232,6 +269,35 @@ of Moscow Institute of Physics and Technology - Pavel Zakharov and Nikita Mokrov
         self.layout.addLayout(self.leftLayout)
         self.layout.addLayout(self.rightLayout)
 
+class HelpWidget(QtGui.QWidget):
+    def __init__(self, parent = None):
+        QtGui.QWidget.__init__(self, parent)
+        self.setWindowTitle("Help")
+
+        self.nerNetPixmap = QtGui.QPixmap("icons/NerNet.jpeg").scaledToWidth(400)
+        self.nerNetImage = QtGui.QLabel()
+        self.nerNetImage.setPixmap(self.nerNetPixmap)
+        self.nerNetImage.setAlignment(QtCore.Qt.AlignHCenter)
+
+        self.label1 = QtGui.QLabel("""<b>What am I dealing with?</b><br>
+            This is a program that recognizes written number from 0 to 9. It is based on <a href="https://en.wikipedia.org/wiki/Artificial_neural_network">neural net</a>,
+            that creates recognizing pattern using pictures with known number.
+            This process is called "fitting". Before using a net, it should be fitted.<br>
+            <b>Note! </b>Fitting is a really slow process, so don't be afraid to wait for a couple of minutes for the first time. Later program will use acquired data, so fitting will 
+            be much faster.""")
+        self.label1.setWordWrap(True);
+        self.label2 = QtGui.QLabel("""Before using a net, fit it, clicking a corresponding button. After finishing you may draw a number and click "Run".
+You will get a predicted number and probability that the prediction is right. (Yes, we cannot predict for sure. Actually, nobody can). "Options" menu enables you to change pen color, width and net architecture.""")
+        self.label2.setWordWrap(True);
+        self.layout = QtGui.QVBoxLayout()
+
+        self.layout.addWidget(self.label1)
+        self.layout.addWidget(self.nerNetImage)
+        self.layout.addWidget(self.label2)
+        
+        self.setLayout(self.layout)
+        self.show()
+
 class MainWindow(QtGui.QMainWindow):
     def __init__(self, parent = None):
         QtGui.QMainWindow.__init__(self, parent)
@@ -239,17 +305,18 @@ class MainWindow(QtGui.QMainWindow):
         self.centWidget = FormWidget(self)
         self.setCentralWidget(self.centWidget)
         self.test = None
+        self.nerNetArchitecture = 0 #0 is for dense-100, 1 for dense-800, 2 is for conv
 
         self.createActions()
         self.createMenus()
 
         self.setWindowTitle(self.tr("Digit recognition v1"))
-        self.resize(500, 500)
+        self.resize(600, 600)
 
         self.connect(self.centWidget.exitBtn, QtCore.SIGNAL('clicked()'), self, QtCore.SLOT('close()'))
         self.centWidget.fitBtn.clicked.connect(self.initializeNetwork)
         self.centWidget.runBtn.clicked.connect(self.run)
-        self.centWidget.aboutBtn.clicked.connect(self.about)
+        self.centWidget.helpBtn.clicked.connect(self.help)
         self.centWidget.clearBtn.clicked.connect(self.centWidget.scribbleArea.clearImage)
 
         self.networkReady = 0
@@ -259,12 +326,10 @@ class MainWindow(QtGui.QMainWindow):
         self.statusBar().addPermanentWidget(self.labl)
         self.setlabl()
 
-        self.timer = QtCore.QBasicTimer()
-        #self.initializeNetwork()
         self.net = NerNet.NerNet()
         self.net.init_data()
         self.net.signalConnect(self.epochEvent)
-        #Need to conect
+        #self.initializeNetwork()
 
     def setlabl(self):
         if self.networkReady == 100:
@@ -275,9 +340,6 @@ class MainWindow(QtGui.QMainWindow):
     def run(self):
         print "Run"
         self.net.get_result(self.centWidget.scribbleArea.prepareImage())
-        #Get result with net
-        #self.net.result(...)
-
 
     def initializeNetwork(self):
         #Fit a net
@@ -299,21 +361,13 @@ class MainWindow(QtGui.QMainWindow):
         self.progBar.setValue(self.networkReady)
         self.setlabl()
 
-    def open(self):
-        if self.maybeSave():
-            fileName = QtGui.QFileDialog.getOpenFileName(self,
-                                                         self.tr("Open File"),
-                                                         QtCore.QDir.currentPath())
-            if not fileName.isEmpty():
-                self.centWidget.scribbleArea.openImage(fileName)
-
     def penColor(self):
         newColor = QtGui.QColorDialog.getColor(self.centWidget.scribbleArea.penColor())
         if newColor.isValid():
             self.centWidget.scribbleArea.setPenColor(newColor)
 
     def penWidth(self):
-        newWidth, ok = QtGui.QInputDialog.getInteger(self, self.tr("Scribble"),
+        newWidth, ok = QtGui.QInputDialog.getInteger(self, self.tr("Width"),
                                                self.tr("Select pen width:"),
                                                self.centWidget.scribbleArea.penWidth(),
                                                1, 50, 1)
@@ -323,15 +377,17 @@ class MainWindow(QtGui.QMainWindow):
     def about(self):
         self.aboutWindow = AboutWidget()
 
-    def createActions(self):
-        self.openAct = QtGui.QAction(self.tr("&Open..."), self)
-        self.openAct.setShortcut(self.tr("Ctrl+O"))
-        self.connect(self.openAct, QtCore.SIGNAL("triggered()"), self.open)
-        
-        self.exitAct = QtGui.QAction(self.tr("E&xit"), self)
-        self.exitAct.setShortcut(self.tr("Ctrl+Q"))
-        self.connect(self.exitAct, QtCore.SIGNAL("triggered()"), self, QtCore.SLOT("close()"))
+    def help(self):
+        self.helpWindow = HelpWidget()
 
+    def changeNetwork(self):
+        self.changeNetWindow = ChangeNetWindow(self.nerNetArchitecture)
+        self.changeNetWindow.btnBox.buttonClicked.connect(self.setNetwork)
+
+    def setNetwork(self):
+        self.nerNetArchitecture = self.changeNetWindow.btnBox.checkedId()
+
+    def createActions(self):
         self.penColorAct = QtGui.QAction(self.tr("&Pen Color..."), self)
         self.connect(self.penColorAct, QtCore.SIGNAL("triggered()"),
                      self.penColor)
@@ -351,16 +407,14 @@ class MainWindow(QtGui.QMainWindow):
         self.aboutQtAct = QtGui.QAction(self.tr("About &Qt"), self)
         self.connect(self.aboutQtAct, QtCore.SIGNAL("triggered()"),
                      QtGui.qApp, QtCore.SLOT("aboutQt()"))
+        self.changeNetworkAct = QtGui.QAction(self.tr("&Change Network"), self)
+        self.connect(self.changeNetworkAct, QtCore.SIGNAL("triggered()"), self.changeNetwork)
 
     def createMenus(self):
-        self.fileMenu = QtGui.QMenu(self.tr("&File"), self)
-        self.fileMenu.addAction(self.openAct)
-        self.fileMenu.addSeparator()
-        self.fileMenu.addAction(self.exitAct)
-
         self.optionMenu = QtGui.QMenu(self.tr("&Options"), self)
         self.optionMenu.addAction(self.penColorAct)
         self.optionMenu.addAction(self.penWidthAct)
+        self.optionMenu.addAction(self.changeNetworkAct)
         self.optionMenu.addSeparator()
         self.optionMenu.addAction(self.clearScreenAct)
 
@@ -368,7 +422,6 @@ class MainWindow(QtGui.QMainWindow):
         self.helpMenu.addAction(self.aboutAct)
         self.helpMenu.addAction(self.aboutQtAct)
 
-        self.menuBar().addMenu(self.fileMenu)
         self.menuBar().addMenu(self.optionMenu)
         self.menuBar().addMenu(self.helpMenu)
 
