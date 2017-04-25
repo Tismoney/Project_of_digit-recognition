@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/home/paul/anaconda2/bin/python2.7
 
 import sys
 from PyQt4 import QtCore, QtGui
@@ -335,7 +335,7 @@ class MainWindow(QtGui.QMainWindow):
         if self.networkReady == 0:
             self.labl.setText("Ready")
         else:
-            self.labl.setText("Initializing..")
+            self.labl.setText("Not Ready")
 
     def run(self):
         print "Run"
@@ -351,7 +351,13 @@ class MainWindow(QtGui.QMainWindow):
         self.networkReady = 0
         self.centWidget.runBtn.setEnabled(False)
         self.centWidget.fitBtn.setEnabled(False)
-        self.net.make_and_check(path = "Weight/Conv")
+        if self.nerNetArchitecture == 0:
+            curpath = "Weight/Dense3"
+        elif self.nerNetArchitecture == 1:
+            curpath = "Weight/Dense1"
+        else:
+            curpath = "Weight/Conv"
+        self.net.make_and_check(path = curpath)
     
     def epochEvent(self, epoch):
         if epoch == self.net.num_epochs:#10
@@ -390,6 +396,8 @@ class MainWindow(QtGui.QMainWindow):
 
     def setNetwork(self):
         self.nerNetArchitecture = self.changeNetWindow.btnBox.checkedId()
+        self.networkReady = 0
+        self.setlabl()
 
     def createActions(self):
         self.penColorAct = QtGui.QAction(self.tr("&Pen Color..."), self)
