@@ -1,4 +1,4 @@
-#!/home/paul/anaconda2/bin/python2.7
+#!/usr/bin/python
 
 import sys
 from PyQt4 import QtCore, QtGui
@@ -332,14 +332,18 @@ class MainWindow(QtGui.QMainWindow):
         #self.initializeNetwork()
 
     def setlabl(self):
-        if self.networkReady == 100:
+        if self.networkReady == 0:
             self.labl.setText("Ready")
         else:
             self.labl.setText("Initializing..")
 
     def run(self):
         print "Run"
-        self.net.get_result(self.centWidget.scribbleArea.prepareImage())
+        ans, sur = self.net.get_result(self.centWidget.scribbleArea.prepareImage())
+        self.centWidget.ansLabel.clear()
+        self.centWidget.ansLabel.setText("Answer: {}".format(ans))
+        self.centWidget.sureLabel.clear()
+        self.centWidget.sureLabel.setText("Sure: {:.2f} %".format(sur))
 
     def initializeNetwork(self):
         #Fit a net

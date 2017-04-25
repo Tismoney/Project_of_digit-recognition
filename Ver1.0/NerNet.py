@@ -104,8 +104,9 @@ class NerNet(QObject):
 		self.val_X = 0
 		self.val_y = 0
 		self.batch_size = 50
-		self.num_epochs = 1 # it must be 10
+		self.num_epochs = 10
 		self.acc = 0
+		self.learning_rate = 0.001
 
 	def signalConnect(self, obj):
 		self.new_epoch.connect(obj)
@@ -151,10 +152,13 @@ class NerNet(QObject):
 
 		if (path == "Weight/Dense3"):
 			output_layer = architecture_one(input_X, weight = False)
+			print("Connect architecture one")
 		elif (path == "Weight/Dense1"):
 			output_layer = architecture_two(input_X, weight = False)
+			print("Connect architecture two")
 		elif (path == "Weight/Conv"):
 			output_layer = architecture_three(input_X, weight = False)
+			print("Connect architecture three")
 		else:
 			print("I can't find architecure!")
 			return 0
@@ -163,9 +167,9 @@ class NerNet(QObject):
 
 		loss = lasagne.objectives.categorical_crossentropy(y_predicted,target_y).mean()
 		accuracy = lasagne.objectives.categorical_accuracy(y_predicted,target_y).mean()
-		updates_sgd = lasagne.updates.rmsprop(loss, all_weights,learning_rate=0.01)
+		updates_sgd = lasagne.updates.rmsprop(loss, all_weights, learning_rate = self.learning_rate)
 
-		train_fun = theano.function([input_X,target_y],[loss,accuracy],updates= updates_sgd)
+		train_fun = theano.function([input_X,target_y], [loss,accuracy], updates= updates_sgd)
 		self.accuracy_fun = theano.function([input_X,target_y],accuracy)
 		self.pred_fun = theano.function([input_X], y_predicted)
 
@@ -213,10 +217,13 @@ class NerNet(QObject):
 		
 		if (path == "Weight/Dense3"):
 			output_layer = architecture_one(input_X, weight = True, weig = self.get_weight(path = "Weight/Dense3"))
+			print("Connect architecture one")
 		elif (path == "Weight/Dense1"):
 			output_layer = architecture_two(input_X, weight = True, weig = self.get_weight(path = "Weight/Dense1"))
+			print("Connect architecture two")
 		elif (path == "Weight/Conv"):
 			output_layer = architecture_three(input_X, weight = True, weig = self.get_weight(path = "Weight/Conv", conv = True))
+			print("Connect architecture three")
 		else:
 			print("I can't find architecure!")
 			return 0
@@ -226,9 +233,9 @@ class NerNet(QObject):
 
 		loss = lasagne.objectives.categorical_crossentropy(y_predicted,target_y).mean()
 		accuracy = lasagne.objectives.categorical_accuracy(y_predicted,target_y).mean()
-		updates_sgd = lasagne.updates.rmsprop(loss, all_weights,learning_rate=0.01)
+		updates_sgd = lasagne.updates.rmsprop(loss, all_weights, learning_rate = self.learning_rate)
 
-		train_fun = theano.function([input_X,target_y],[loss,accuracy],updates= updates_sgd)
+		train_fun = theano.function([input_X,target_y],[loss,accuracy],updates = updates_sgd)
 		self.accuracy_fun = theano.function([input_X,target_y],accuracy)
 		self.pred_fun = theano.function([input_X], y_predicted)
 		self.new_epoch.emit(self.num_epochs)
@@ -237,6 +244,7 @@ class NerNet(QObject):
 	def make_and_check(self, path = "Weight"):
 		if (len(os.listdir(path)) == 0): self.make_and_fit(path = path)
 		else: self.make_and_get(path = path)
+	#	self.make_and_fit(path = path)
 
 	def get_accuracy(self):
 		if (self.acc == 0): 
