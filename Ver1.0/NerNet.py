@@ -152,15 +152,15 @@ class NerNet(QObject):
 
 		if (path == "Weight/Dense3"):
 			output_layer = architecture_one(input_X, weight = False)
-			print("Connect architecture one")
+			#print("Connect architecture one")
 		elif (path == "Weight/Dense1"):
 			output_layer = architecture_two(input_X, weight = False)
-			print("Connect architecture two")
+			#print("Connect architecture two")
 		elif (path == "Weight/Conv"):
 			output_layer = architecture_three(input_X, weight = False)
-			print("Connect architecture three")
+			#print("Connect architecture three")
 		else:
-			print("I can't find architecure!")
+			#print("I can't find architecure!")
 			return 0
 		y_predicted = lasagne.layers.get_output(output_layer)
 		all_weights = lasagne.layers.get_all_params(output_layer)
@@ -193,14 +193,14 @@ class NerNet(QObject):
 		        val_acc += self.accuracy_fun(inputs, targets)
 		        val_batches += 1
 
-		    print("Epoch {} of {} took {:.3f}s".format(
-		        epoch + 1, self.num_epochs, time.time() - start_time))
+		    #print("Epoch {} of {} took {:.3f}s".format(
+		       # epoch + 1, self.num_epochs, time.time() - start_time))
 
-		    print("  training loss (in-iteration):\t\t{:.6f}".format(train_err / train_batches))
-		    print("  train accuracy:\t\t{:.2f} %".format(
-		        train_acc / train_batches * 100))
-		    print("  validation accuracy:\t\t{:.2f} %".format(
-		        val_acc / val_batches * 100))
+		    #print("  training loss (in-iteration):\t\t{:.6f}".format(train_err / train_batches))
+		    #print("  train accuracy:\t\t{:.2f} %".format(
+		      #  train_acc / train_batches * 100))
+		    #print("  validation accuracy:\t\t{:.2f} %".format(
+		      #  val_acc / val_batches * 100))
 
             	
 		if (path == "Weight/Dense3"):
@@ -217,15 +217,15 @@ class NerNet(QObject):
 		
 		if (path == "Weight/Dense3"):
 			output_layer = architecture_one(input_X, weight = True, weig = self.get_weight(path = "Weight/Dense3"))
-			print("Connect architecture one")
+			#print("Connect architecture one")
 		elif (path == "Weight/Dense1"):
 			output_layer = architecture_two(input_X, weight = True, weig = self.get_weight(path = "Weight/Dense1"))
-			print("Connect architecture two")
+			#print("Connect architecture two")
 		elif (path == "Weight/Conv"):
 			output_layer = architecture_three(input_X, weight = True, weig = self.get_weight(path = "Weight/Conv", conv = True))
-			print("Connect architecture three")
+			#print("Connect architecture three")
 		else:
-			print("I can't find architecure!")
+			#print("I can't find architecure!")
 			return 0
 		
 		y_predicted = lasagne.layers.get_output(output_layer)
@@ -255,8 +255,8 @@ class NerNet(QObject):
 			    acc = self.accuracy_fun(inputs, targets)
 			    test_acc += acc
 			    test_batches += 1
-			print("Final results:")
-			print("  test accuracy:\t\t{:.2f} %".format(test_acc / test_batches * 100))
+			#print("Final results:")
+			#print("  test accuracy:\t\t{:.2f} %".format(test_acc / test_batches * 100))
 			self.acc = test_acc / test_batches * 100
 			return test_acc / test_batches * 100
 		else:
@@ -271,5 +271,5 @@ class NerNet(QObject):
 		#print y_pred
 		pred_num = y_pred.argmax()
 		pred_prob = y_pred[0, pred_num] * self.acc
-		print("Predict is {} with probabylity {:.2f} %".format(pred_num, pred_prob))
+		#print("Predict is {} with probabylity {:.2f} %".format(pred_num, pred_prob))
 		return pred_num, pred_prob

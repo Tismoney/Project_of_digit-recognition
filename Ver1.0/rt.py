@@ -188,6 +188,7 @@ class ChangeNetWindow(QtGui.QWidget):
         self.layout.addWidget(self.dense100Btn)
         self.layout.addWidget(self.dense800Btn)
         self.layout.addWidget(self.convBtn)
+        self.layout.addWidget(self.OK)
         self.setLayout(self.layout)
         self.show()
     
@@ -208,6 +209,9 @@ class ChangeNetWindow(QtGui.QWidget):
             self.dense800Btn.setChecked(True)
         else:
             self.convBtn.setChecked(True)
+        self.OK = QtGui.QPushButton("OK")
+        self.connect(self.OK, QtCore.SIGNAL('clicked()'), self, QtCore.SLOT('close()'))
+
 
 
 class AboutWidget(QtGui.QWidget):
@@ -273,6 +277,7 @@ class HelpWidget(QtGui.QWidget):
     def __init__(self, parent = None):
         QtGui.QWidget.__init__(self, parent)
         self.setWindowTitle("Help")
+        self.setFixedSize(QtCore.QSize(500, 600))
 
         self.nerNetPixmap = QtGui.QPixmap("icons/NerNet.jpeg").scaledToWidth(400)
         self.nerNetImage = QtGui.QLabel()
@@ -289,14 +294,21 @@ class HelpWidget(QtGui.QWidget):
         self.label2 = QtGui.QLabel("""Before using a net, fit it, clicking a corresponding button. After finishing you may draw a number and click "Run".
 You will get a predicted number and probability that the prediction is right. (Yes, we cannot predict for sure. Actually, nobody can). "Options" menu enables you to change pen color, width and net architecture.""")
         self.label2.setWordWrap(True);
-        self.layout = QtGui.QVBoxLayout()
+        self.btn = QtGui.QPushButton("OK")
+        self.btn.sizeHint = self.btnSize
+        self.btn.setSizePolicy(QtGui.QSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed))
+        self.connect(self.btn, QtCore.SIGNAL('clicked()'), self, QtCore.SLOT('close()'))
+        self.layout = QtGui.QGridLayout()
 
-        self.layout.addWidget(self.label1)
-        self.layout.addWidget(self.nerNetImage)
-        self.layout.addWidget(self.label2)
+        self.layout.addWidget(self.label1, 0, 0, 1, 3)
+        self.layout.addWidget(self.nerNetImage, 1, 0, 1, 3)
+        self.layout.addWidget(self.label2, 2, 0, 1, 3)
+        self.layout.addWidget(self.btn, 3, 1, 1, 1)
         
         self.setLayout(self.layout)
         self.show()
+    def btnSize(self):
+        return QtCore.QSize(80, 50)
 
 class MainWindow(QtGui.QMainWindow):
     def __init__(self, parent = None):
@@ -320,6 +332,7 @@ class MainWindow(QtGui.QMainWindow):
         self.centWidget.clearBtn.clicked.connect(self.centWidget.scribbleArea.clearImage)
 
         self.networkReady = 0
+        self.networkIsReady = False
         self.progBar = QtGui.QProgressBar()
         self.statusBar().addWidget(self.progBar)
         self.labl = QtGui.QLabel()
@@ -332,23 +345,28 @@ class MainWindow(QtGui.QMainWindow):
         #self.initializeNetwork()
 
     def setlabl(self):
-        if self.networkReady == 0:
-            self.labl.setText("Ready")
+        if self.networkIsReady == False and self.networkReady != 0:
+            self.labl.setText("Initializing..")
+        elif self.networkIsReady == False:
+            self.labl.setText("Initialization Required")
         else:
-            self.labl.setText("Not Ready")
+            self.labl.setText("Ready")
 
     def run(self):
-        print "Run"
-        ans, sur = self.net.get_result(self.centWidget.scribbleArea.prepareImage())
-        self.centWidget.ansLabel.clear()
-        self.centWidget.ansLabel.setText("Answer: {}".format(ans))
-        self.centWidget.sureLabel.clear()
-        self.centWidget.sureLabel.setText("Sure: {:.2f} %".format(sur))
+        #print "Run"
+        if self.networkIsReady == True:
+            ans, sur = self.net.get_result(self.centWidget.scribbleArea.prepareImage())
+            self.centWidget.ansLabel.clear()
+            self.centWidget.ansLabel.setText("Answer: {}".format(ans))
+            self.centWidget.sureLabel.clear()
+            self.centWidget.sureLabel.setText("Sure: {:.2f} %".format(sur))
+        else:
+            print("Error") #do something
+
 
     def initializeNetwork(self):
-        #Fit a net
-        #self.net.get_accuracy() - init area
         self.networkReady = 0
+        self.networkIsReady = False
         self.centWidget.runBtn.setEnabled(False)
         self.centWidget.fitBtn.setEnabled(False)
         if self.nerNetArchitecture == 0:
@@ -364,8 +382,9 @@ class MainWindow(QtGui.QMainWindow):
             self.centWidget.runBtn.setEnabled(True)
             self.centWidget.fitBtn.setEnabled(True)
             self.progBar.setValue(100)
-            self.setlabl()
             self.networkReady = 0
+            self.networkIsReady = True
+            self.setlabl()
             return
         self.networkReady = self.networkReady + 100 / self.net.num_epochs #10
         self.progBar.setValue(self.networkReady)
@@ -397,6 +416,7 @@ class MainWindow(QtGui.QMainWindow):
     def setNetwork(self):
         self.nerNetArchitecture = self.changeNetWindow.btnBox.checkedId()
         self.networkReady = 0
+        self.networkIsReady = False
         self.setlabl()
 
     def createActions(self):
